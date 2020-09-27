@@ -3,6 +3,11 @@ const exphbs = require('express-handlebars')
 const app = express()
 const port = 3000
 const restaurants = require('./restaurant.json')
+const restaurantsObject = restaurants.results.reduce((acc, cur) => {
+  acc[cur.id] = cur
+  return acc
+}, {})
+
 //setting template engine
 app.engine('handlebars', exphbs({ defaultLayout: 'main' }))
 app.set('view engine', 'handlebars')
@@ -18,6 +23,15 @@ app.get('/', (req, res) => {
 app.get('/restaurants/:id', (req, res) => {
   res.render('show', { restaurant: restaurantsObject[req.params.id] })
 })
+
+app.get('/search', (req, res) => {
+  const keyword = req.query.keyword.trim().toLowerCase()
+  const searchResults = restaurants.results.filter(item => item.name.toLowerCase().includes(keyword))
+  res.render('index', { restaurants: searchResults, keyword })
+})
+
+
+
 app.listen(port, () => {
   console.log(`Express is listening on http://localhost:${port}`)
 })
